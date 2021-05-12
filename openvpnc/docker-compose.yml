@@ -9,7 +9,5 @@ services:
       - logvolume01:/var/log
     links:
       - redis
-  ubuntu:
-    image: ubuntu
 volumes:
   logvolume01: {}
