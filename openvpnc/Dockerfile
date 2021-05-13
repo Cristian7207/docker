@@ -1,1 +1,2 @@
-FROM ubuntu
+FROM docker
+RUN apk add openvpn
