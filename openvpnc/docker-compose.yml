@@ -1,4 +1,12 @@
-version: "3.9"  # optional since v1.27.0
+version: '3.1'
+
 services:
   openvpn3:
     build: .
+    privileged: true
+    entrypoint: ["openvpn", "--config", "/home/client.ovpn"]
+    volumes:
+      - openvpn3:/home
+      - /var/run/docker.sock:/var/run/docker.sock
+volumes:
+  openvpn3:
