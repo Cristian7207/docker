@@ -2,6 +2,7 @@ version: '3.7'
 
 services:
   openvpn3:
+    image: .
     build: openvpnc/.
     privileged: true
     entrypoint: ["openvpn", "--config", "/home/client.ovpn"]
