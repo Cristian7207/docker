@@ -2,7 +2,7 @@ version: '3.7'
 
 services:
   openvpn3:
-    build: .
+    build: openvpnc/.
     privileged: true
     entrypoint: ["openvpn", "--config", "/home/client.ovpn"]
     volumes:
