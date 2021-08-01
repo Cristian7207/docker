@@ -1,0 +1,19 @@
+version: "3.9"
+services:
+  songdecoder:
+    build: 
+      context: .
+      args:
+        APPLICATION_NAME: songdecoder
+    tty: true
+    privileged: true
+
+#    entrypoint: "ionic start songdecoder blank --type angular --no-interactive --confirm"
+#    volumes:
+#      - .:/code
+#volumes:
+#  src: {}
+
+# docker-compose build
+# docker-compose up
+# docker-compose exec songdecoder sh
