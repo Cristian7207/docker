@@ -1,19 +1,34 @@
 version: "3.9"
 services:
   songdecoder:
-    build: 
-      context: .
-      args:
-        APPLICATION_NAME: songdecoder
+    image: songdecoder:latest
+    entrypoint: ionic serve --lab --external
+    deploy:
+      placement:
+        constraints:
+          - "node.hostname==om-node1"
+#    build: 
+#      context: .
+#      args:
+#       APPLICATION_NAME: ${APPLICATION_NAME}
+#    entrypoint: "bash -c ionic serve"
+#    entrypoint: "/bin/bash"
     tty: true
-    privileged: true
-
+#    privileged: true
+    volumes:
+      - src:/usr/songdecoder/src
+ #     - "./src:/usr/${APPLICATION_NAME}/src"
+ #   environment:
+ #     - APPLICATION_NAME=${APPLICATION_NAME}
+    ports:
+      - 8100:8100
+      - 8200:8200
 #    entrypoint: "ionic start songdecoder blank --type angular --no-interactive --confirm"
 #    volumes:
 #      - .:/code
-#volumes:
-#  src: {}
+volumes:
+  src:
 
-# docker-compose build
-# docker-compose up
+# docker-compose up --build
 # docker-compose exec songdecoder sh
+# docker stack deploy --compose-file docker-compose.yml songdecoder
