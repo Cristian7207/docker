@@ -1,0 +1,41 @@
+version: '3.1'
+
+services:
+  joomla:
+    image: joomla
+    restart: always
+    links:
+      - joomladb:mysql
+
+    ports:
+      - 8080:80
+    environment:
+      JOOMLA_DB_HOST: joomladb
+      JOOMLA_DB_PASSWORD: myjoomlapass
+      VIRTUAL_HOST: joinmeet.anysoftc.ml
+      LETSENCRYPT_HOST: joinmeet.anysoftc.ml
+      LETSENCRYPT_EMAIL: cheredia0529@gmail.com
+    volumes:
+      - html:/var/www/html
+    deploy:
+      placement:
+        constraints: [node.hostname == om-node2]
+    
+  joomladb:
+    image: mysql:5.6
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: myjoomlapass
+    volumes:
+      - mysql:/var/lib/mysql
+    deploy:
+      placement:
+        constraints: [node.hostname == om-node2]
+volumes:
+  html:
+  mysql:
+
+#networks:
+#  overlay:
+#    external:
+#      name: nginx-proxy

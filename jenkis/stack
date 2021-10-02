@@ -1,0 +1,15 @@
+version: '3.8'
+
+services:
+  jenkins:
+    image: jenkins/jenkins
+    volumes:
+     - jenkins:/var/jenkins_home
+    ports:
+      - 8081:8080 
+      - 50000:50000
+    deploy:
+      placement:
+        constraints: [node.hostname == om-node1]
+volumes: 
+  jenkins:

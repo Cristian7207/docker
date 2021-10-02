@@ -1,0 +1,26 @@
+version: "3.1"
+
+services:
+  glances:
+    image: nicolargo/glances:latest
+    ports:
+      - "61208-61209:61208-61209"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      - GLANCES_OPT=-w
+    deploy:
+      placement:
+        constraints: [node.hostname == om-node1]
+
+  glances-om-node2:
+    image: nicolargo/glances:latest
+    ports:
+      - "61210-61211:61208-61209"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    environment:
+      - GLANCES_OPT=-w
+    deploy:
+      placement:
+        constraints: [node.hostname == om-node2]

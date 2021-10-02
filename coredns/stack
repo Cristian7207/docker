@@ -1,0 +1,17 @@
+version: '3.1'
+
+services:
+  coredns:
+    image: coredns/coredns
+    volumes:
+     - coredns:/root
+    ports:
+
+      - 53:53/udp
+    command: -conf /root/Corefile
+    deploy:
+      placement:
+        constraints: [node.hostname == om-node1]
+
+volumes: 
+  coredns:

@@ -1,0 +1,97 @@
+sudo systemctl start docker
+sudo systemctl start docker.socket
+sudo systemctl start docker
+sudo systemctl stop docker.socket
+sudo systemctl stop docker
+sudo systemctl stop containerd
+sudo systemctl status docker
+sudo systemctl disable docker.socket
+sudo systemctl disable docker
+sudo systemctl disable containerd
+sudo systemctl enable docker.socket
+sudo systemctl enable docker
+sudo systemctl enable containerd
+
+
+
+
+sudo k0s install controller --enable-worker
+k0s start
+k0s status
+k0s kubectl get nodes
+k0s token create --role=worker
+k0s install worker --token-file k0s-token
+
+
+
+sudo cp /var/lib/k0s/pki/admin.conf ~/admin.conf
+export KUBECONFIG=~/admin.conf
+
+
+kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.3.1/aio/deploy/recommended.yaml
+kubectl delete -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.3.1/aio/deploy/recommended.yaml
+kubectl get ns
+kubectl -n kubernetes-dashboard get all
+kubectl -n kubernetes-dashboard describe service kubernetes-dashboard
+  Endpoints:                10.244.0.5:8443
+
+
+kubectl -n kubernetes-dashboard get pods -o wide
+kubectl -n kubernetes-dashboard get svc
+kubectl -n kubernetes-dashboard port-forward kubernetes-dashboard-67484c44f6-hfp9x 8100:8443
+kubectl port-forward --address 0.0.0.0  : 
+
+
+# Debug
+kubectl -n kubernetes-dashboard get pod kubernetes-dashboard-67484c44f6-gkmnp
+kubectl -n kubernetes-dashboard describe pod kubernetes-dashboard-67484c44f6-hfp9x
+kubectl logs web1 -c back1
+kubectl exec web1 -c back1 /bin/bash
+kubectl -n kubernetes-dashboard edit svc kubernetes-dashboard
+write -> type: LoadBalancer
+kubectl get pods --all-namespaces -o wide
+kubectl get services --all-namespaces -o wide
+
+kubectl -n kubernetes-dashboard delete deployment kubernetes-dashboard
+kubectl get nodes -o wide
+
+
+ --namespace=kube-system 
+
+k0s default-config > k0s.yaml
+k0s server -c k0.yaml
+
+clusterUser=root
+k0s kubeconfig create --groups "system:masters" $clusterUser > ~/config
+
+wget https://github.com/k0sproject/k0sctl/releases/download/v0.8.4/k0sctl-linux-x64 && mv k0sctl-linux-x64 k0sctl && chmod 777 k0sctl
+
+kubectl describe node om-node1
+
+
+
+# K3S
+wget https://github.com/k3s-io/k3s/releases/download/v1.22.2%2Bk3s1/k3s
+chmod 777 k3s
+mv k3s /usr/bin
+ip address
+
+k3s server --node-ip=10.0.0.114 &
+cat /var/lib/rancher/k3s/server/node-token
+k3s agent --server https://10.0.0.114:6443   --token K1009f26f971b938fd9f9f273e190389a0bf5bfa7e00ad95847f5a2c3e39f8d307f::server:a7d182c99288e0cf02655b0f200ec531
+
+k3s server --node-ip=10.0.0.53 &
+
+
+k3s kubectl -n kubernetes-dashboard expose deployment kubernetes-dashboard --port=8100 --type=NodePort
+k3s kubectl -n kubernetes-dashboard describe pod
+k3s kubectl -n kubernetes-dashboard describe services kubernetes-dashboard
+k3s kubectl proxy --address='0.0.0.0' --accept-hosts='^*$' -p 80
+# exponer ui kubernetes
+k3s kubectl port-forward -n kubernetes-dashboard service/kubernetes-dashboard 10443: 443 --address 0.0.0.0
+k3s kubectl create serviceaccount dashboard -n default
+k3s kubectl create clusterrolebinding dashboard-admin -n default --clusterrole=cluster-admin --serviceaccount=default:dashboard
+k3s kubectl get secrets
+k3s kubectl describe secret dashboard-token-q5s7
+ sudo cp /etc/rancher/k3s/k3s.yaml ~/admin.conf
+export KUBECONFIG=~/admin.conf

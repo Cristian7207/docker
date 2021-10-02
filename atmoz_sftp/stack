@@ -1,0 +1,9 @@
+version: '3.1'
+services:
+  sftp:
+      image: atmoz/sftp
+      volumes: 
+        - /home/ubuntu/upload:/home/ubuntu/upload
+      ports:
+        - "2222:22"
+      command: ubuntu:mysftppass:1001

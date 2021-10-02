@@ -1,0 +1,8 @@
+version: '3.8'
+
+services:
+  rancher:
+    image: rancher/server
+    privileged: true
+    ports:
+      - "8087:8080"

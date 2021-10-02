@@ -1,0 +1,27 @@
+version: "3.8"
+
+services:
+  nginx-proxy:
+    image: jwilder/nginx-proxy
+    ports:
+      - "80:80"
+    volumes:
+      - var/run/docker.sock:/tmp/docker.sock:ro
+
+  letsencrypt:
+    image: jrcs/letsencrypt-nginx-proxy-companion
+    restart: always
+    volumes: 
+      - letsencrypt:/etc/nginx/certs:rw
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    volumes-from:
+      - nginx-proxy:rw
+
+volumes:
+  letsencrypt:
+  
+
+#networks:
+#  overlay:
+#    external:
+#      name: nginx-proxy
