@@ -1,6 +1,7 @@
+# Inicializacion de DOCKER
 sudo systemctl start docker
 sudo systemctl start docker.socket
-sudo systemctl start docker
+sudo systemctl start containerd
 sudo systemctl stop docker.socket
 sudo systemctl stop docker
 sudo systemctl stop containerd
@@ -12,9 +13,76 @@ sudo systemctl enable docker.socket
 sudo systemctl enable docker
 sudo systemctl enable containerd
 
+# INSTALL K0s
+curl -sSLf https://get.k0s.sh | sudo sh 
+sudo k0s install controller --single
+sudo k0s start
+sudo k0s status
+k0s token create --role=worker
+sudo cp /var/lib/k0s/pki/admin.conf ~/admin.conf
+export KUBECONFIG=~/admin.conf
+kubectl get nodes
+
+### Storage Class
+kubectl apply -f https://openebs.github.io/charts/openebs-operator.yaml
+
+kubectl patch storageclass openebs-hostpath -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}'
+kubectl patch storageclass local-path -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}'
+kubectl patch storageclass local-storage -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"false"}}}'
+kubectl patch storageclass slow -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"false"}}}'
+kubectl patch storageclass standard -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"false"}}}'
+
+### On Worker
+cat /dev/null > k0stoken
+sudo k0s install worker --token-file k0stoken
+k0s start
+
+### On ARM
+wget https://github.com/k0sproject/k0s/releases/download/v1.22.2%2Bk0s.1/k0s-v1.22.2+k0s.1-arm64
+chmod 777 k0s-v1.22.2+k0s.1-arm64
+mv k0s-v1.22.2+k0s.1-arm64 k0s
+mv k0s /usr/bin
 
 
+### Uninstall
+k0s stop
+k0s reset
+reboot
 
+# Portainer
+kubectl apply -n portainer -f https://raw.githubusercontent.com/portainer/k8s/master/deploy/manifests/portainer/portainer.yaml
+kubectl -nportainer describe pods
+kubectl -nportainer delete pods
+kubectl -nportainer get pvc
+kubectl -nportainer delete pvc portainer
+
+#KUBECTL
+kubectl get pods --all-namespaces
+kubectl describe pods --all-namespaces
+
+# INSTALL k3s
+### In Server
+curl -sfL https://get.k3s.io | sh -
+#wget https://github.com/k3s-io/k3s/releases/download/v1.19.15%2Bk3s2/k3s
+#chmod 777 k3s
+#mv k3s /usr/bin
+#k3s server --node-ip=10.0.0.114  & 
+sudo cp /etc/rancher/k3s/k3s.yaml ~/admin.conf
+export KUBECONFIG=~/admin.conf
+kubectl get node
+cat /var/lib/rancher/k3s/server/node-token
+
+### In Worker
+curl -sfL https://get.k3s.io | K3S_URL=https://10.0.0.114:6443 K3S_TOKEN=K10533f763b9874426e142617bc968e3a4323f9cb7f3723786f95a0d1535ae274b7::server:1c2687f957da5f6ae71c1989caa66945 sh -
+cat /var/lib/rancher/k3s/server/node-token
+k3s agent --server https://10.0.0.114:6443   --token K108660c762d32dd756a03e4327ee81ec8733031f7b167fd4d3c8ad247e8e075e1a::server:4bd0ac023b76cdd666a310661bbf393b
+
+### Uninstall
+/usr/local/bin/k3s-uninstall.sh
+/usr/local/bin/k3s-agent-uninstall.sh
+
+
+####################################################################
 sudo k0s install controller --enable-worker
 k0s start
 k0s status
@@ -22,11 +90,28 @@ k0s kubectl get nodes
 k0s token create --role=worker
 k0s install worker --token-file k0s-token
 
+####################################################################
+
+# microk8s
+sudo snap install microk8s --classic --channel=1.21
+sudo usermod -a -G microk8s $USER
+sudo chown -f -R $USER ~/.kube
+su - $USER
+microk8s status --wait-ready
+microk8s kubectl get nodes
+microk8s kubectl get services
+~/.bash_aliases
+alias kubectl='microk8s kubectl'
+kubectl create deployment nginx --image=nginx
+kubectl get pods
+microk8s enable dns storage portainer
+
+### on worker
+microk8s add-node
 
 
-sudo cp /var/lib/k0s/pki/admin.conf ~/admin.conf
-export KUBECONFIG=~/admin.conf
 
+####################################################################
 
 kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.3.1/aio/deploy/recommended.yaml
 kubectl delete -f https://raw.githubusercontent.com/kubernetes/dashboard/v2.3.1/aio/deploy/recommended.yaml
@@ -43,13 +128,15 @@ kubectl port-forward --address 0.0.0.0  :
 
 
 # Debug
+kubectl get pods --all-namespaces -o wide
+kubectl describe pods --all-namespaces -o wide
 kubectl -n kubernetes-dashboard get pod kubernetes-dashboard-67484c44f6-gkmnp
 kubectl -n kubernetes-dashboard describe pod kubernetes-dashboard-67484c44f6-hfp9x
 kubectl logs web1 -c back1
 kubectl exec web1 -c back1 /bin/bash
-kubectl -n kubernetes-dashboard edit svc kubernetes-dashboard
+kubectl -n  edit svc
+# kubernetes-dashboard
 write -> type: LoadBalancer
-kubectl get pods --all-namespaces -o wide
 kubectl get services --all-namespaces -o wide
 
 kubectl -n kubernetes-dashboard delete deployment kubernetes-dashboard
@@ -60,6 +147,8 @@ kubectl get nodes -o wide
 
 k0s default-config > k0s.yaml
 k0s server -c k0.yaml
+
+sudo cp /var/lib/k0s/pki/admin.conf ~/admin.conf
 
 clusterUser=root
 k0s kubeconfig create --groups "system:masters" $clusterUser > ~/config
@@ -77,8 +166,7 @@ mv k3s /usr/bin
 ip address
 
 k3s server --node-ip=10.0.0.114 &
-cat /var/lib/rancher/k3s/server/node-token
-k3s agent --server https://10.0.0.114:6443   --token K1009f26f971b938fd9f9f273e190389a0bf5bfa7e00ad95847f5a2c3e39f8d307f::server:a7d182c99288e0cf02655b0f200ec531
+
 
 k3s server --node-ip=10.0.0.53 &
 
@@ -95,3 +183,8 @@ k3s kubectl get secrets
 k3s kubectl describe secret dashboard-token-q5s7
  sudo cp /etc/rancher/k3s/k3s.yaml ~/admin.conf
 export KUBECONFIG=~/admin.conf
+
+docker rmi $(docker images -f "dangling=true" -q)
+
+
+
